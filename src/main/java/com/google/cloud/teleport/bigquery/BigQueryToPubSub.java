@@ -15,23 +15,24 @@
  */
 package com.google.cloud.teleport.bigquery;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.CharBuffer;
 import java.util.Objects;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.coders.AvroCoder;
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.Method;
-import org.apache.beam.sdk.io.gcp.bigquery.WriteResult;
-import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
-import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.options.Validation.Required;
-import org.apache.beam.sdk.schemas.transforms.Convert;
-import org.apache.beam.sdk.values.Row;
+import org.apache.beam.sdk.options.ValueProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.api.services.bigquery.model.TableRow;
+import com.google.cloud.teleport.util.SimpleValueProvider;
+
 /**
  * A Dataflow pipeline to stream <a href="https://avro.apache.org/">Apache Avro</a> records from
  * Pub/Sub into a BigQuery table.
@@ -41,17 +42,20 @@ import org.slf4j.LoggerFactory;
  */
 public final class BigQueryToPubSub {
 
+  
   /**
    * Validates input flags and executes the Dataflow pipeline.
    *
    * @param args command line arguments to the pipeline
    */
   public static void main(String[] args) {
+    new BigQueryLog4jConfig();
     new BigQueryToPubSub(new BigQueryToPubSubOptions()
         .setLog(LoggerFactory.getLogger(BigQueryToPubSub.class))
         .setOptions(PipelineOptionsFactory.fromArgs(args)
             .withValidation()
-            .as(BigQueryToPubSubRunOptions.class))).run();
+            .as(BigQueryToPubSubRunOptions.class)
+            )).run();
   }
 
 
@@ -69,9 +73,19 @@ public final class BigQueryToPubSub {
    * @param options execution parameters to the pipeline
    * @return result of the pipeline execution as a {@link PipelineResult}
    */
-  private PipelineResult run() {
-    System.out.println("hi scott@adligo.com in run ");
-    log.warn("hi scott@adligo.com in run, with warn or higher level! ");
-    return null;
+  @SuppressWarnings("unchecked")
+  private void run() {
+    if (log.isInfoEnabled()) {
+      log.info("Starting run!");
+    }
+
+    Pipeline pipeline = Pipeline.create(options);
+    pipeline.apply("Read from BigQuery",new BigQueryProducer(options));
+    pipeline.run(); 
+    if (log.isInfoEnabled()) {
+      log.info("Run complete!");
+    }
   }
 }
+
+
