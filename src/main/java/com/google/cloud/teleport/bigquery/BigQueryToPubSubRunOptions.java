@@ -29,14 +29,7 @@ import com.google.cloud.teleport.util.SimpleValueProvider;
  *
  */
 public interface BigQueryToPubSubRunOptions extends PipelineOptions {
-  
-  /**
-   * The GCP project id to use when running the input query
-   * @return
-   */
-  @Description("The GCP project id to use when running the BigQuery.")
-  @Required
-  ValueProvider<String> getInputProjectId();
+
   
   /**
    * The big query that creates the input for the BigQueryToPubSub job.
@@ -68,13 +61,5 @@ public interface BigQueryToPubSubRunOptions extends PipelineOptions {
    * @param query
    */
   void setInputQueryFilePath(ValueProvider<String> query);
-
-  /**
-   * Note Googles annotation has bugs, it doesn't allow method chaning 
-   * so I can't return this.
-   * @see {@link BigQueryToPubSubRunOptions#getInputProjectId()}
-   * @param query
-   */
-  void setInputProjectId(ValueProvider<String> projectId);
 
 }

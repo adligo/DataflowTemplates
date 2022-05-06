@@ -18,6 +18,7 @@ import com.google.cloud.teleport.util.SimpleValueProvider;
  *
  */
 public class BigQueryToPubSubOptions {
+  public static final String READING_THE_FOLLOWING_BYTE_COUNT = "Reading the following byte count; ";
   public static final String EITHER_A_INPUT_QUERY_OR_INPUT_QUERY_FILE_PATH_WITH_A_VAILD_QUERY_IS_REQUIRED = "Either a inputQuery or inputQueryFilePath with a vaild query is required!";
   public static final String NO_INPUT_QUERY_FILE_PATH_PROVIDED = "No inputQueryFilePath provided.";
   public static final String READ_QUERY = "Read query;\n";
@@ -61,9 +62,12 @@ public class BigQueryToPubSubOptions {
           throw new RuntimeException(THE_FOLLOWING_FILE_IS_TO_BIG + size + " " + filePath);
         }
         int s = (int) size;
+        if (log.isInfoEnabled()) {
+          log.info(READING_THE_FOLLOWING_BYTE_COUNT + s);
+        }
         CharBuffer cb = CharBuffer.allocate(s);
         fr.read(cb);
-        String query = cb.toString();
+        String query = new String(cb.array());
         if (log.isInfoEnabled()) {
           log.info(READ_QUERY + query);
         }
