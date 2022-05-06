@@ -13,3 +13,5 @@
 # MacOSX Files
 **/.DS_Store/**/*
 **/.DS_Store
+/bin/
+/.project
