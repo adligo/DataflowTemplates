@@ -37,6 +37,11 @@ import com.google.cloud.teleport.util.SimpleValueProvider;
  * A Dataflow pipeline to stream <a href="https://avro.apache.org/">Apache Avro</a> records from
  * Pub/Sub into a BigQuery table.
  *
+ * I think this is actually working now, however I had to do
+ * mv /Users/<uid>/.config/gcloud/application_default_credentials.json /Users/<uid>/.config/gcloud/application_default_credentials-orig.json
+ * and then gcloud auth login to fix a issue with authentication
+ * https://developers.google.com/accounts/docs/application-default-credentials
+ * 
  * <p>Any persistent failures while writing to BigQuery will be written to a Pub/Sub dead-letter
  * topic.
  */
@@ -74,7 +79,7 @@ public final class BigQueryToPubSub {
    * @return result of the pipeline execution as a {@link PipelineResult}
    */
   @SuppressWarnings("unchecked")
-  private void run() {
+  public void run() {
     if (log.isInfoEnabled()) {
       log.info("Starting run!");
     }
