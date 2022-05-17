@@ -47,27 +47,8 @@ public interface BigQueryToPubSubRunOptions extends PipelineOptions, GcpOptions 
    * @return
    */
   @Description("The query to run.")
-  ValueProvider<String> getInputQuery();
+  String getInputQuery();
 
-  /**
-   * @see {@link #getInputQuery()}
-   * @return
-   */
-  default String getInputQueryString() {
-    ValueProvider<String> vp = getInputQuery();
-    if (vp == null) {
-      return null;
-    }
-    return vp.get();
-  }
-
-  /**
-   * The file path of a file containing a input query
-   * @return
-   */
-  @Description("The system dependent file path to a file that contains the query, and if present will be used to replace the inputQuery's value.")
-  @Required
-  ValueProvider<String> getInputQueryFilePath();
 
   @Description("The gcp template location.")
   void setGcpTemplateLocation(ValueProvider<String> templateLocation);
@@ -93,43 +74,13 @@ public interface BigQueryToPubSubRunOptions extends PipelineOptions, GcpOptions 
     }
     setGcpTemplateLocation( vp);
   }
-  
+
   /**
    * Note Googles annotation has bugs, it doesn't allow method chaning 
    * so I can't return this.
    * @see {@link BigQueryToPubSubRunOptions#getInputQuery()}
    * @param query
    */
-  void setInputQuery(ValueProvider<String> query);
-  
-  /**
-   * Adapts a String to a ValueProvider
-   * @see {@link #setInputQuery(ValueProvider)}
-   * @param query
-   */
-  default void setInputQueryString(String query) {
-    setInputQueryString(query, LOG);
-  }
-  
-  /**
-   * Adapts a String to a ValueProvider
-   * @see {@link #setInputQuery(ValueProvider)}
-   * @param query
-   */
-  default void setInputQueryString(String query, Logger log) {
-    ValueProvider<String> vp = ValueProvider.StaticValueProvider.of(query);
-    if (log.isDebugEnabled()) {
-      log.debug(THE_QUERY_VALUE_PROVIDER_IS + vp);
-    }
-    setInputQuery( vp);
-  }
-  
-  /**
-   * Note Googles annotation has bugs, it doesn't allow method chaning 
-   * so I can't return this.
-   * @see {@link BigQueryToPubSubRunOptions#getInputQueryFilePath()}
-   * @param query
-   */
-  void setInputQueryFilePath(ValueProvider<String> query);
+  void setInputQuery(String query);
 
 }

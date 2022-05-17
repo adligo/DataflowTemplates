@@ -17,5 +17,7 @@ public class BigQueryLog4jConfig {
   public BigQueryLog4jConfig() {
     Logger.getLogger(BigQueryToPubSub.class).setLevel(Level.DEBUG);
     Logger.getLogger(DelegatingPTransform.class).setLevel(Level.DEBUG);
+    Logger.getLogger(Done.class).setLevel(Level.DEBUG);
+    Logger.getLogger(TableRowToStringTransformer.class).setLevel(Level.DEBUG);
   }
 }

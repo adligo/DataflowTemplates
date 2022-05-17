@@ -27,10 +27,14 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.ValueProvider;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.cloud.teleport.templates.common.BigQueryConverters;
 import com.google.cloud.teleport.util.SimpleValueProvider;
 
 /**
@@ -56,8 +60,7 @@ public final class BigQueryToPubSub {
   public static void main(String[] args) {
     new BigQueryLog4jConfig();
     new BigQueryToPubSub(new BigQueryToPubSubOptions()
-        .setLog(LoggerFactory.getLogger(BigQueryToPubSub.class))
-        .setOptions(PipelineOptionsFactory.fromArgs(args)
+        .setRunOptions(PipelineOptionsFactory.fromArgs(args)
             .withValidation()
             .as(BigQueryToPubSubRunOptions.class)
             )).run();
@@ -69,7 +72,7 @@ public final class BigQueryToPubSub {
   
   
   public BigQueryToPubSub(BigQueryToPubSubOptions opts) {
-    options = Objects.requireNonNull(opts.getOptions());
+    options = Objects.requireNonNull(opts).updateInputQueryFromFilePath();
     log = Objects.requireNonNull(opts.getLog());
   }
   /**
@@ -78,15 +81,18 @@ public final class BigQueryToPubSub {
    * @param options execution parameters to the pipeline
    * @return result of the pipeline execution as a {@link PipelineResult}
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public void run() {
     if (log.isInfoEnabled()) {
       log.info("Starting run!");
     }
-
     Pipeline pipeline = Pipeline.create(options);
-    pipeline.apply("Read from BigQuery",new BigQueryProducer(options));
-    pipeline.run(); 
+    pipeline
+      //.apply("Read from BigQuery", (PTransform<? super PBegin, PCollection<TableRow>>) new BigQueryProducer(options))
+      .apply("Read from BigQuery", BigQueryIO.read().fromQuery(options.getInputQuery())) 
+      .apply("Transforming TableRow to String", new TableRowToStringTransformer())
+      .apply("Done", new Done(pipeline));
+    
     if (log.isInfoEnabled()) {
       log.info("Run complete!");
     }
